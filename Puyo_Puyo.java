@@ -50,3 +50,30 @@ public class Puyo_Puyo extends JFrame
 		new Puyo_Puyo();
 	}
 }
+
+class GamePane extends JComponent implements ActionListener
+{
+	static int rows,cols;	
+	static int scr[][];			//scr or(screen) array holds the information about puyos to display
+	Node tetris;				//Formation of Tetris is checked using this object
+	Timer timer,timer1,timer2,anim_timer;	//different timers used for animation of puyos
+	Image img[]=new Image[4];	//holds 4 puyo images
+	Image fpipe,bpipe;			//holds the front and back part of pipe image
+								//2 images of pipe used to get the experience of puyos coming out from pipe
+	String files[]={"intro.mid","enter.wav","sound735.wav","blip.wav","sound65.wav","sound136.wav","tada.wav","sound713.wav"};
+	AudioClip clips[]=new AudioClip[8];//Array of audio clips to load the sound files
+	Toolkit tk;			//used to load the images		
+	Random rand;		//this object used to generate puyos randomly in color.
+	int rot;			//used for the rotation of the puyos
+	int len;			//length of the puyo ie. width and height
+	boolean reached;	//generated puyo reached the bottom or in movement
+	int count;			//count of puyos when formed tetris to delete
+	boolean started;	//Game is started or not
+	boolean gameOver,paused; 
+	int a,b;			//The two puyos generate to be next are stored in a and b
+	int level,score,pieces,removed_puyos;//pieces is number of joint puyos(single piece) generated
+					//number of removed puyos by forming tetris
+	int minscore;	
+	int anim;		//to build the pixel by pixel animation (movement of generated puyos)
+	float alpha,alpha1;
+	boolean levelflag;
