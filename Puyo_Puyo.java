@@ -196,3 +196,54 @@ class GamePane extends JComponent implements ActionListener
 		});
 		setFocusable(true);			//to set the keyboard focus on this game pane
 	}
+
+	public void init()//all variables declared above are initialized here
+	{
+		scr=new int[rows][cols];
+		rot=1;
+		reached=true;
+		count=0;
+		started=false;
+		gameOver=false;
+		paused=false;
+		a=0;
+		b=0;
+		level=0;
+		score=0;
+		pieces=-1;
+		removed_puyos=0;
+		minscore=50;
+		anim=0;
+		alpha=0.0f;
+		alpha1=0.0f;
+		levelflag=true;
+		tk= Toolkit.getDefaultToolkit();
+		rand=new Random();
+		timer=new Timer(1000,this);	//generates action event for each 1075 milli seconds when timer is started
+		timer.setInitialDelay(0);	//generates first event ofter 0 ms when timer starts
+		timer1=new Timer(1000,this);
+		timer2=new Timer(500,this);
+		anim_timer=new Timer(50,this);
+		anim_timer.start();			//starting the timer
+	}
+	public void loadImages()//loading images into the image array and pipe objects
+	{
+		String s="";
+		if(len>=42)
+		s="_";
+		for(int i=0;i<img.length;i++)
+		img[i]=tk.getImage("images\\puyo_"+s+(i+1)+".png");
+		fpipe=tk.getImage("images\\pipe"+s+"1.png");
+		bpipe=tk.getImage("images\\pipe"+s+".png");
+	}
+	public void loadSounds()//loading souds into the AudioClip array
+	{
+		try{
+			for(int i=0;i<clips.length;i++)	//Loading all the sound clips
+			clips[i]=Applet.newAudioClip(new URL("file:"+System.getProperty("user.dir")+"\\sounds\\"+files[i]));
+			
+		}
+		catch (MalformedURLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
