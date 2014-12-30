@@ -388,5 +388,37 @@ class GamePane extends JComponent implements ActionListener
 		timer.start();
 	}
 
-
 	
+	public void chkForTetris(int x,int y)
+	{
+		if(y<cols-1 && scr[x][y]==scr[x][y+1] && !existsInTetris(x,y+1))
+		{							//check for the same color puyo at the right side of 
+			count++;				//current puyo which is not already added to the current tetris
+			addToTetris(x,y+1);		//If there is then add that to the current tetris
+			chkForTetris(x,y+1);	//Then check this node can connected to any same color puyo
+		}
+		if(x<rows-1 && scr[x][y]==scr[x+1][y] && !existsInTetris(x+1,y))
+		{
+			count++;
+			addToTetris(x+1,y);		//check at the down side
+			chkForTetris(x+1,y);
+		}
+		if(y>0 && scr[x][y]==scr[x][y-1] && !existsInTetris(x,y-1))
+		{
+			count++;
+			addToTetris(x,y-1);		//check at the left side
+			chkForTetris(x,y-1);
+		}
+		//I found a bug here and i rectified it by adding below if block
+		//Before iam not checked up side
+		//but if below type of chain combo formed by puyos
+		//			* *
+		//          ***
+		//then up right puyo cannot be added to the tetris to remove
+		if(x>0 && scr[x][y]==scr[x-1][y] && !existsInTetris(x-1,y))
+		{
+			count++;
+			addToTetris(x-1,y);		//check at the up side
+			chkForTetris(x-1,y);
+		}
+	}
