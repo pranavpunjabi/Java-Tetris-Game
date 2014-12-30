@@ -77,3 +77,122 @@ class GamePane extends JComponent implements ActionListener
 	int anim;		//to build the pixel by pixel animation (movement of generated puyos)
 	float alpha,alpha1;
 	boolean levelflag;
+
+	public GamePane(int l,int r,int c)
+	{
+		len=l;		//length of puyos is set by the Puyo_Puyo class where it is calculated and sent here
+		rows=r+1;	//number of rows is taken 12+1 for the easyness of generating puyos from pipe.
+					//extra one row is occupied by pipe at the top. Only 12 rows are used for puyos.
+		cols=c;	    //6 columns
+		init();		//initializing game data
+		//puyo images are selected depending on the length of puyos
+		//length of puyo is calculated depending on the resolution of screen
+		//In this game i used two types of puyos for 
+		//(i)800*600 and below resolutions
+		//(ii)1024*768 and above resolutions
+		//So images are loaded ofter length of puyos is calculated
+		loadImages();
+		loadSounds();		
+		generatePuyos();				//to start the generating puyos
+		clips[0].loop();
+		addKeyListener(new KeyAdapter()
+		{
+			public void keyPressed(KeyEvent e)
+			{
+				if(e.getKeyCode()==KeyEvent.VK_ENTER)
+				{
+					//if game is not started then start the game by starting timer when enter is pressed
+					//ig game is over then initialize the variables and start generating puyos also
+					if(!started)		
+					{
+						clips[0].stop();
+						clips[1].play();
+						setDelays();
+						timer.start();
+						started=true;
+					}
+					if(gameOver)		
+					{
+						init();
+						generatePuyos();
+						clips[0].loop();
+						started=false;
+					}
+					if(paused)
+					{
+						init();
+						generatePuyos();
+						clips[0].loop();
+						started=false;
+					}
+					repaint();
+				}
+				else
+				if(e.getKeyCode()==KeyEvent.VK_LEFT && !reached && !paused)//move puyos left if each puyo not reached to ground
+				{
+					clips[3].play();
+					moveLeft();
+				}
+				else
+				if(e.getKeyCode()==KeyEvent.VK_RIGHT && !reached && !paused)
+				{
+					clips[3].play();
+					moveRight();
+				}
+				else
+				if(e.getKeyCode()==KeyEvent.VK_UP && !paused )
+				{
+					clips[3].play();
+					if(!reached)
+					rotate();
+					if(!started && level<19)	//Before strting the game 
+						level++;
+				}
+				else
+				if(e.getKeyCode()==KeyEvent.VK_DOWN && !paused)
+				{
+					clips[3].play();
+					moveDown();
+					if(!started && level>0) 	//Before strting the game 
+					level--;
+				}
+				else
+				if(e.getKeyCode()==KeyEvent.VK_P && started && !gameOver)
+				{
+					//if game is already paused then resume it, other wise pause the game
+					if(paused)
+					{
+						clips[1].play();
+						paused=false;
+						alpha1=0.0f;
+						timer.start();		//game is resumed
+					}
+					else
+					{
+						clips[2].play();
+						timer.stop();
+						paused=true;		//game is paused
+					}
+				}
+				else
+				if(e.getKeyCode()==KeyEvent.VK_ESCAPE)
+				{
+					clips[2].play();
+					//if game is already paused then exit the game, other wise pause the game
+					if( started && !gameOver)
+					{
+						if(paused)
+						System.exit(0);		//exit the game
+						else
+						{
+							timer.stop();
+							paused=true;		//game is paused
+						}
+					}
+					else
+					System.exit(0);
+				}
+			}
+		});
+		setFocusable(true);			//to set the keyboard focus on this game pane
+	}
