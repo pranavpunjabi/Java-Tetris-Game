@@ -388,7 +388,7 @@ class GamePane extends JComponent implements ActionListener
 		timer.start();
 	}
 
-	
+
 	public void chkForTetris(int x,int y)
 	{
 		if(y<cols-1 && scr[x][y]==scr[x][y+1] && !existsInTetris(x,y+1))
@@ -421,4 +421,202 @@ class GamePane extends JComponent implements ActionListener
 			addToTetris(x-1,y);		//check at the up side
 			chkForTetris(x-1,y);
 		}
+	}
+
+	public void addToTetris(int x,int y)//adding another node to the present tetris
+	{
+		tetris.setNext(new Node(x,y));
+		tetris.getNext().setPrev(tetris);//It is totally the linked list concept used here
+		tetris=tetris.getNext();
+	}
+	public boolean existsInTetris(int x,int y)//comparing with the all the nodes in present tetris 
+	{										//that it is already exists or not
+		Node n=tetris;
+		while(n!=null)
+		{
+			if(n.getX()==x && n.getY()==y)
+			return true;
+			n=n.getPrev();
+		}
+		return false;
+	}
+	public void removeAllTetris()
+	{
+		Node n=tetris;
+		while(n!=null)
+		{
+			scr[n.getX()][n.getY()]=0;	//removing puyos which are in tetris
+			n=n.getPrev();				
+		}
+		removed_puyos+=count;
+		if(removed_puyos>=50)		//Change the level of the game depending on
+		{								//number of removed puyos.
+			if(levelflag)
+			level+=1;
+			else
+			level-=1;				//Ofter playing the final level(here 20) the level decreased by 1
+			if(level==20)			//It is decreased up to 15 and then it increases 20
+			levelflag=false;		//So The Game is endlessly continued if player can play all levels perfectly without any minstake at any level.
+			if(level==15 && !levelflag)
+			levelflag=true;
+			setDelays();
+			removed_puyos=0;
+		}	
+		score+=minscore*(count-3)*count;//Score is calculated by using this formula
+		minscore=minscore*count;		//minscore in formula depends on the number of puyos formed in last tetris
+										//Scoring is totally depends on the length of the chain and 
+										//number of chains formed by puyos at a single time
+	}
+	public void fillVacated()	//vacated places formed by removed puyos are filled with the other puyos by the law of gravity
+	{
+		for(int i=rows-2;i>=0;i--)
+		for(int j=0;j<cols;j++)
+		if(scr[i][j]>0)				//for all puyos
+		{
+			int k;
+			for(k=i+1;k<=rows-1;k++)
+			if(scr[k][j]>0)			//any puyo exist below the current puyo up to the ground
+			{
+				scr[k-1][j]=scr[i][j]; //then move on to it
+				if(i!=k-1)
+				scr[i][j]=0;
+				break;
+			}
+			else if(k==rows-1)		//if no puyo exist below the current puyo up to the ground
+			{
+				scr[rows-1][j]=scr[i][j];	//then move on to the ground
+				if(i!=rows-1)
+				scr[i][j]=0;
+			}
+		}
+	}
+	public void moveLeft()	//to move the coming down puyos one step left 
+	{					
+		for(int i=0;i<rows;i++)
+		for(int j=0;j<cols;j++)
+		if(scr[i][j]>0 && scr[i][j]%2==1 && j>0 )//for all the coming down puyos which are not in first column(or left column)
+		{
+			
+			if(j<cols-1 && scr[i][j+1]%2==1 && scr[i][j-1]==0)	//if two puyo are in horizontal
+			{													//if there is no puyo in left
+					scr[i][j-1]=scr[i][j];		//move two puyo to one step left
+					scr[i][j]=scr[i][j+1];
+					scr[i][j+1]=0;
+			}
+			else
+			if(scr[i][j-1]==0 && scr[i+1][j-1]==0 )//if two puyo are in vertical & there is no puyos in left
+			{
+				scr[i][j-1]=scr[i][j];
+				scr[i+1][j-1]=scr[i+1][j];		//move two puyo to one step left
+				scr[i][j]=0;
+				scr[i+1][j]=0;
+			}
+			return;
+		}
+	}
+	public void moveRight()	//to move the coming down puyos one step right
+	{
+		for(int i=0;i<rows;i++)
+		for(int j=cols-1;j>=0;j--)
+		if(scr[i][j]>0 && scr[i][j]%2==1 && j<cols-1)//for all the coming down puyos which are not in last column(or right column)
+		{
+			if(j>0 && scr[i][j-1]%2==1 && scr[i][j+1]==0)//if two puyo are in horizontal
+			{											//if there is no puyo in right
+					scr[i][j+1]=scr[i][j];
+					scr[i][j]=scr[i][j-1];				//move two puyo to one step right
+					scr[i][j-1]=0;
+			}
+			else
+			if(scr[i][j+1]==0 && scr[i+1][j+1]==0 )//if two puyo are in vertical & there is no puyos in right
+			{
+				scr[i][j+1]=scr[i][j];
+				scr[i+1][j+1]=scr[i+1][j];			//move two puyo to one step right
+				scr[i][j]=0;
+				scr[i+1][j]=0;
+			}
+			return;			
+		}
+	}
+	public void rotate()	//to rotate the coming down puyos in clock wise direction by 90 degrees
+	{
+		for(int i=0;i<rows;i++)
+		for(int j=0;j<cols;j++)
+		if(scr[i][j]>0 && scr[i][j]%2==1)//for all the coming down puyos 
+		{
+			//alway consider the puyo left and top for horizontal and vertical positions as present
+			//because checking is taking from top to bottom
+			//Two puyos can make only four different positions rotating 90 degrees each time
+			if(rot==1)	//first postion=vertical
+			{			//moving down puyo to the left of first puyo makes 90 degrees rotaion to get second postion
+				if(j>0 && scr[i][j-1]==0)//is left side is empty or not
+				{
+					scr[i][j-1]=scr[i+1][j];
+					scr[i+1][j]=0;		//If it is empty location move there
+					rot=2;				//change to second position
+				}
+				else if(j<cols-1 && scr[i][j+1]==0)//is left side is not empty, chk for right position
+				{
+					scr[i][j+1]=scr[i][j];//move present puyo to the right
+					scr[i][j]=scr[i+1][j];//move down puyo to the present location
+					scr[i+1][j]=0;
+					rot=2;				//change to second position
+				}
+			}//second postion=horizontal
+			else if(rot==2 && i>1)//moving present puyo to the up of right puyo makes 90 degrees rotaion to get third position
+			{
+				scr[i-1][j+1]=scr[i][j];//move present puyo to the up of the right puyo
+				scr[i][j]=0;
+				rot=3;					//change to third position
+			}//third postion=vertcal (invert to the first postion in two puyos positions)
+			else if(rot==3)			//moving present puyo to the up of right puyo makes 90 degrees rotaion to get fourth position
+			{
+				if(j<cols-1 && scr[i+1][j+1]==0)//is right side of the down puyo is empty or not
+				{
+					scr[i+1][j+1]=scr[i][j];	//If it is empty location move there
+					scr[i][j]=0;				
+					rot=4;						//change to fourth position
+				}
+				else if(j>0 && scr[i+1][j-1]==0)//is left side of the down puyo is empty or not
+				{
+					scr[i+1][j-1]=scr[i+1][j];	//move down puyo to the left
+					scr[i+1][j]=scr[i][j];		//move present puyo to the down
+					scr[i][j]=0;
+					rot=4;						//change to fourth position
+				}
+			}//fourth position=horizontal (invert to the second postion in two puyos positions)
+			else if(rot==4 && i<rows-1)//moving right puyo to the down of the current puyo makes 90 degrees rotaion to get first position
+			{
+				if(scr[i+1][j]==0)//is down position is empty or not
+				{
+					scr[i+1][j]=scr[i][j+1];//move right puyo to the down of the present puyo
+					scr[i][j+1]=0;
+					rot=1;					//change to first position
+				}
+			}
+			return;
+		}
+	}
+	public void moveDown()//Moving generated moving puyos by one step down
+	{
+		for(int i=rows-1;i>=0;i--)
+		for(int j=0;j<cols;j++)
+		if(scr[i][j]%2==1)//For all moving puyos
+		{
+			if(i==rows-1)	//if puyo is in last row
+			{
+				scr[i][j]=scr[i][j]+1;//making it as grounded
+				reached=true;
+			}
+			else if(scr[i+1][j]>0 && scr[i+1][j]%2==0)//if next row of puyo contains another puyo
+			{
+				scr[i][j]=scr[i][j]+1;//then stop the current puyo at the current postion
+				reached=true;
+			}
+			else 
+			{
+				scr[i+1][j]=scr[i][j];//Move present puyo one step down
+				scr[i][j]=0;
+			}
+		}
+		repaint();
 	}
