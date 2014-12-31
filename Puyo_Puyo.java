@@ -684,8 +684,60 @@ class GamePane extends JComponent implements ActionListener
 		//front part of pipe is drawn as image 
 		g.drawImage(fpipe,p*len-len,0,len,len,null);
 		//so when the puyo are at the postion of generation we get experience of puyo coming from the pipe
-		
+
+		if(!started)//if game is not started display the information
+		{
+			g2.setPaint(Color.yellow);
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,0.8f));
+			g2.fill(new Rectangle(0,rows*len/4,(cols+3)*len,(rows+1)*len/2));
+			g2.setPaint(Color.blue);
+			g2.setFont(new Font("Ariel",Font.PLAIN,len/2));
+			g2.drawString("  Level: "+level,len*3,rows*len/3);
+			g2.setFont(new Font("Ariel",Font.PLAIN,len/3));
+			g2.drawString("Use the <up> and <down> arrow keys to change level now",len/4,(rows+2)*len/3); 
+			g2.setFont(new Font("Ariel",Font.PLAIN,len/2));
+			g2.drawString(" Press <Enter> to start the Game",len,rows*len/2);
+			g2.setFont(new Font("Ariel",Font.PLAIN,len/3));
+			g2.drawString("   Use the left,right and down arrow keys to move the puyos.",0,(rows+1)*len/2); 
+			g2.drawString("   Pressing the up arrow key rotates the piece.",len,(rows+2)*len/2);
+			g2.drawString("  When 4 or more puyos of the same colour are touching",len/3,(rows+3)*len/2);
+			g2.drawString("                       they disappear. ",len,(rows+4)*len/2);
+			g2.drawString("              Press <p> to pause the Game",len,(rows+5)*len/2);
+			g2.drawString("            Press <Escape> to exit the Game",len,(rows+6)*len/2);
 		}
+		if(gameOver)//if game is over dim the game by using alpha composite and display the information
+		{
+			g2.setPaint(Color.white);
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,alpha));
+			if(alpha<0.9f)
+			alpha=alpha+0.02f;//to build the animation of alpha blending
+			g2.fill(new Rectangle(0,0,len*cols,len*rows));
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,1.0f));
+			g2.setPaint(Color.red);
+			g2.setFont(new Font("Ariel",Font.PLAIN,len/2));
+			g2.drawString("Game Over",len*3/2,rows*len/2);
+			g2.setPaint(Color.blue);
+			g2.setFont(new Font("Ariel",Font.PLAIN,len/3));
+			g2.drawString("Press <Enter> to restart the Game",len/2,(rows+1)*len/2);
+		}
+		if(paused)//if game is paused dim the game by using alpha composite and display the information
+		{
+			g2.setPaint(Color.white);
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,alpha1));
+			if(alpha1<0.9f)
+			alpha1=alpha1+0.02f;
+			g2.fill(new Rectangle(0,0,len*cols,len*rows));
+			g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,1.0f));
+			g2.setPaint(Color.blue);
+			g2.setFont(new Font("Ariel",Font.PLAIN,len/2));
+			g2.drawString("Game Paused",len*3/2,rows*len/2);
+			g2.setFont(new Font("Ariel",Font.PLAIN,len/3));
+			g2.drawString("   Press <p> to resume the Game",len/2,(rows+1)*len/2);
+			g2.drawString("  Press <Escape> to exit the Game",len/2,(rows+2)*len/2);
+			g2.drawString(" Press <Enter> to restart the Game",len/2,(rows+3)*len/2);
+		}
+		
 	}
+}
 
 
